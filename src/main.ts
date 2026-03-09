@@ -16,8 +16,29 @@ async function bootstrap() {
     .filter(Boolean);
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow non-browser clients and same-origin/server-to-server requests.
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const isExactAllowed = allowedOrigins.includes(origin);
+      let isVercelDomain = false;
+      try {
+        isVercelDomain = /\.vercel\.app$/.test(new URL(origin).hostname);
+      } catch {
+        isVercelDomain = false;
+      }
+
+      if (isExactAllowed || isVercelDomain) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`), false);
+    },
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // 🔥 Enable global validation
