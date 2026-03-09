@@ -1,0 +1,41 @@
+databases:
+  - name: library-db
+    plan: free
+    databaseName: library_db
+    user: library_user
+
+services:
+  - type: web
+    name: library-backend
+    env: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start:prod
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: FRONTEND_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: DATABASE_HOST
+        fromDatabase:
+          name: library-db
+          property: host
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: library-db
+          property: port
+      - key: DATABASE_USER
+        fromDatabase:
+          name: library-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: library-db
+          property: password
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: library-db
+          property: database

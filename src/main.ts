@@ -10,14 +10,19 @@ async function bootstrap() {
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
 
+  const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
   });
 
   // 🔥 Enable global validation
   app.useGlobalPipes(new ValidationPipe());
 
-  await app.listen(3001);
+  await app.listen(process.env.PORT || 3001);
 }
 bootstrap();
